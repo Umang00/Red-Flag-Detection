@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Form from "next/form";
 
 import { Input } from "./ui/input";
@@ -14,6 +17,13 @@ export function AuthForm({
   children: React.ReactNode;
   defaultEmail?: string;
 }) {
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus on client-side to avoid hydration mismatch
+  useEffect(() => {
+    emailInputRef.current?.focus();
+  }, []);
+
   return (
     <Form action={action} className="flex flex-col gap-4 px-4 sm:px-16">
       <div className="flex flex-col gap-2">
@@ -25,8 +35,8 @@ export function AuthForm({
         </Label>
 
         <Input
+          ref={emailInputRef}
           autoComplete="email"
-          autoFocus
           className="bg-muted text-md md:text-sm"
           defaultValue={defaultEmail}
           id="email"
