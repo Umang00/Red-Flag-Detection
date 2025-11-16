@@ -286,6 +286,13 @@ function PureMultimodalInput({
     return () => textarea.removeEventListener('paste', handlePaste);
   }, [handlePaste]);
 
+  // Focus on client-side to avoid hydration mismatch
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className={cn("relative flex w-full flex-col gap-4", className)}>
       {messages.length === 0 &&
@@ -353,7 +360,6 @@ function PureMultimodalInput({
         )}
         <div className="flex flex-row items-start gap-1 sm:gap-2">
           <PromptInputTextarea
-            autoFocus
             className="grow resize-none border-0! border-none! bg-transparent p-2 text-sm outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
             data-testid="multimodal-input"
             disableAutoResize={true}
