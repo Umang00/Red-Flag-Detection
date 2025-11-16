@@ -136,6 +136,8 @@ export async function POST(request: Request) {
           parts: message.parts,
           attachments: [],
           createdAt: new Date(),
+          redFlagData: null,
+          deletedAt: null,
         },
       ],
     });
@@ -219,6 +221,8 @@ export async function POST(request: Request) {
             createdAt: new Date(),
             attachments: [],
             chatId: id,
+            redFlagData: null,
+            deletedAt: null,
           })),
         });
 

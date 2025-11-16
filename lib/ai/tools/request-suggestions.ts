@@ -8,16 +8,13 @@ type RequestSuggestionsProps = {
   dataStream: UIMessageStreamWriter<ChatMessage>;
 };
 
-export const requestSuggestions = ({
-  session,
-  dataStream,
-}: RequestSuggestionsProps) =>
+export const requestSuggestions = (_props: RequestSuggestionsProps) =>
   tool({
     description: "Request suggestions (not implemented)",
     inputSchema: z.object({
       documentId: z.string().describe("The ID of the document"),
     }),
-    execute: async () => {
+    execute: () => {
       return {
         error: "Suggestions feature is not available",
       };

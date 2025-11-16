@@ -13,7 +13,13 @@
       "Bash(pnpm dev)",
       "Bash(pnpm lint:*)",
       "Bash(npx ultracite:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(pnpm db:generate:*)",
+      "Bash(npx ultracite@latest fix:*)",
+      "Bash(timeout:*)",
+      "Bash(nul)",
+      "Bash(exit 0)",
+      "Bash(.gitignore)"
     ],
     "deny": [],
     "ask": []
