@@ -1,0 +1,26 @@
+# Red Flag Detector - Claude Code Rules
+
+This file contains development rules for Claude Code. See `CLAUDE.md` for the full documentation.
+
+## Quick Rules
+
+1. **Always test after completing TODOs**: Run `pnpm dev` and `pnpm build`
+2. **Use latest info**: Check MCP tools and web for latest documentation
+3. **Verify database names**: Check `lib/db/schema.ts` and Supabase MCP - never assume
+4. **No deprecated code**: Always use latest patterns and APIs
+5. **Run linter**: Fix all errors with `pnpm lint`
+
+## Database Naming
+- Tables: PascalCase (`"User"`, `"Chat"`)
+- Columns: camelCase (`createdAt`, `userId`)
+- Always verify in `lib/db/schema.ts` before using
+
+## Testing Checklist
+- [ ] `pnpm build` succeeds
+- [ ] `pnpm dev` runs without errors
+- [ ] `pnpm lint` passes
+- [ ] Feature works in browser
+- [ ] No TypeScript errors
+
+For complete rules, see `CLAUDE.md`.
+
