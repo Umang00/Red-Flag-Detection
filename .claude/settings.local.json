@@ -3,7 +3,16 @@
     "allow": [
       "Bash(pnpm install)",
       "Bash(pnpm build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Phase 0 - Critical fixes for Red Flag Detector\n\nFixed critical issues preventing the boilerplate from working correctly\nfor the Red Flag Detector use case.\n\n## Changes\n\n### Authentication Library Fix\n- Replace bcrypt-ts with bcryptjs (NextAuth.js compatibility)\n- Update auth.ts to use bcryptjs compare function\n- Update lib/db/utils.ts to use bcryptjs hash function\n\n### Guest Mode Removal\n- Remove guest authentication provider from auth.ts\n- Simplify NextAuth type declarations (remove UserType)\n- Update middleware.ts to redirect to /login instead of guest route\n- Align with PRD requirement: \"No guest mode\"\n\n### Environment Configuration\n- Complete rewrite of .env.example with all required variables\n- Add Supabase PostgreSQL connection strings\n- Add NextAuth.js, GitHub OAuth, Resend, Cloudinary, Gemini configs\n- Add cron secret and file retention configuration\n- Include detailed comments and free tier limits\n\n### Dependencies\n- Add bcryptjs ^2.4.3\n- Add @types/bcryptjs ^2.4.6\n- Successfully installed with pnpm (698 packages)\n\n## Status\n- ✅ Phase 0.1: bcrypt library fixed\n- ✅ Phase 0.2: auth.ts updated\n- ✅ Phase 0.3: Guest mode removed\n- ✅ Phase 0.4: Environment template completed\n\n## Next Steps\n- User must create .env.local from .env.example\n- Phase 1: Clean up unused dependencies\n- Phase 2: Add Red Flag specific database tables\n- Phase 3: Delete unused boilerplate files\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm lint:*)",
+      "Bash(npx ultracite:*)"
     ],
     "deny": [],
     "ask": []

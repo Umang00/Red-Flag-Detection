@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Form from "next/form";
+import { useEffect, useRef } from "react";
 
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -35,13 +35,13 @@ export function AuthForm({
         </Label>
 
         <Input
-          ref={emailInputRef}
           autoComplete="email"
           className="bg-muted text-md md:text-sm"
           defaultValue={defaultEmail}
           id="email"
           name="email"
           placeholder="user@acme.com"
+          ref={emailInputRef}
           required
           type="email"
         />

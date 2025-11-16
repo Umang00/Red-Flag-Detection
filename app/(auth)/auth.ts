@@ -37,7 +37,7 @@ export const {
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize({ email, password }: any) {
         const users = await getUser(email);

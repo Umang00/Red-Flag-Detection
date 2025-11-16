@@ -14,7 +14,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // Allow access to auth routes (login, register, etc.)
-  if (pathname.startsWith("/api/auth") || pathname === "/login" || pathname === "/register") {
+  if (
+    pathname.startsWith("/api/auth") ||
+    pathname === "/login" ||
+    pathname === "/register"
+  ) {
     return NextResponse.next();
   }
 
