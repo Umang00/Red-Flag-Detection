@@ -8,11 +8,6 @@ import {
   streamText,
 } from "ai";
 import { unstable_cache as cache } from "next/cache";
-import { after } from "next/server";
-import {
-  createResumableStreamContext,
-  type ResumableStreamContext,
-} from "resumable-stream";
 import type { ModelCatalog } from "tokenlens/core";
 import { fetchModels } from "tokenlens/fetch";
 import { getUsage } from "tokenlens/helpers";
@@ -22,10 +17,7 @@ import { userEntitlements } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-import { createDocument } from "@/lib/ai/tools/create-document";
-import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -47,8 +39,6 @@ import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
 
-let globalStreamContext: ResumableStreamContext | null = null;
-
 const getTokenlensCatalog = cache(
   async (): Promise<ModelCatalog | undefined> => {
     try {
@@ -64,26 +54,6 @@ const getTokenlensCatalog = cache(
   ["tokenlens-catalog"],
   { revalidate: 24 * 60 * 60 } // 24 hours
 );
-
-export function getStreamContext() {
-  if (!globalStreamContext) {
-    try {
-      globalStreamContext = createResumableStreamContext({
-        waitUntil: after,
-      });
-    } catch (error: any) {
-      if (error.message.includes("REDIS_URL")) {
-        console.log(
-          " > Resumable streams are disabled due to missing REDIS_URL"
-        );
-      } else {
-        console.error(error);
-      }
-    }
-  }
-
-  return globalStreamContext;
-}
 
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
@@ -185,17 +155,9 @@ export async function POST(request: Request) {
           experimental_activeTools:
             selectedChatModel === "chat-model-reasoning"
               ? []
-              : [
-                  "getWeather",
-                  "createDocument",
-                  "updateDocument",
-                  "requestSuggestions",
-                ],
+              : ["requestSuggestions"],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
-            getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
             requestSuggestions: requestSuggestions({
               session,
               dataStream,

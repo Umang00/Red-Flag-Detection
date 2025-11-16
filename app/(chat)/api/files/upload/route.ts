@@ -1,20 +1,29 @@
-import { put } from "@vercel/blob";
+import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-
 import { auth } from "@/app/(auth)/auth";
 
-// Use Blob instead of File since File is not available in Node.js environment
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Red Flag Detector accepts images (JPG, PNG) and PDFs
 const FileSchema = z.object({
   file: z
     .instanceof(Blob)
-    .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: "File size should be less than 5MB",
+    .refine((file) => file.size <= 100 * 1024 * 1024, {
+      message: "File size should be less than 100MB",
     })
-    // Update the file type based on the kind of files you want to accept
-    .refine((file) => ["image/jpeg", "image/png"].includes(file.type), {
-      message: "File type should be JPEG or PNG",
-    }),
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+      {
+        message: "File type should be JPEG, PNG, or PDF",
+      }
+    ),
 });
 
 export async function POST(request: Request) {
@@ -46,16 +55,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
-    // Get filename from formData since Blob doesn't have name property
+    // Get filename from formData
     const filename = (formData.get("file") as File).name;
     const fileBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(fileBuffer);
 
     try {
-      const data = await put(`${filename}`, fileBuffer, {
-        access: "public",
+      // Upload to Cloudinary
+      const uploadResult = await new Promise<any>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "red-flag-detector",
+            resource_type: "auto",
+            public_id: `${Date.now()}-${filename}`,
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+        uploadStream.end(buffer);
       });
 
-      return NextResponse.json(data);
+      return NextResponse.json({
+        url: uploadResult.secure_url,
+        pathname: filename,
+        contentType: file.type,
+      });
     } catch (_error) {
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }

@@ -12,7 +12,8 @@
       "Bash(cat:*)",
       "Bash(pnpm dev)",
       "Bash(pnpm lint:*)",
-      "Bash(npx ultracite:*)"
+      "Bash(npx ultracite:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []
