@@ -9,8 +9,11 @@ import {
   gt,
   gte,
   inArray,
+  isNull,
   lt,
+  lte,
   type SQL,
+  sum,
 } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -26,7 +29,10 @@ import {
   type Suggestion,
   stream,
   suggestion,
+  type UploadedFile,
   type User,
+  uploadedFiles,
+  usageLogs,
   user,
   vote,
 } from "./schema";
@@ -502,6 +508,174 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get stream ids by chat id"
+    );
+  }
+}
+
+// ========================================
+// Red Flag Detector - Usage Tracking
+// ========================================
+
+/**
+ * Get user's total analysis count for today
+ * @param userId - User ID to check usage for
+ * @returns Total analysis count for today (0 if no usage)
+ */
+export async function getUserDailyUsage({
+  userId,
+}: {
+  userId: string;
+}): Promise<number> {
+  try {
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split("T")[0];
+
+    const [result] = await db
+      .select({ total: sum(usageLogs.analysisCount) })
+      .from(usageLogs)
+      .where(and(eq(usageLogs.userId, userId), eq(usageLogs.date, today)));
+
+    // sum() returns string or null, convert to number
+    return result?.total ? Number(result.total) : 0;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get user daily usage"
+    );
+  }
+}
+
+/**
+ * Get user's total analysis count for a specific month
+ * @param userId - User ID to check usage for
+ * @param month - Month in YYYY-MM format (e.g., "2025-01")
+ * @returns Total analysis count for the month (0 if no usage)
+ */
+export async function getUserMonthlyUsage({
+  userId,
+  month,
+}: {
+  userId: string;
+  month: string;
+}): Promise<number> {
+  try {
+    // Parse month string to get start and end dates
+    // month format: "YYYY-MM" or "YYYY-MM-DD"
+    const monthPrefix = month.slice(0, 7); // Get YYYY-MM part
+    const startDate = `${monthPrefix}-01`; // First day of month
+
+    // Calculate first day of next month
+    const [year, monthNum] = monthPrefix.split("-").map(Number);
+    const nextMonth = monthNum === 12 ? 1 : monthNum + 1;
+    const nextYear = monthNum === 12 ? year + 1 : year;
+    const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+
+    const [result] = await db
+      .select({ total: sum(usageLogs.analysisCount) })
+      .from(usageLogs)
+      .where(
+        and(
+          eq(usageLogs.userId, userId),
+          gte(usageLogs.date, startDate),
+          lt(usageLogs.date, endDate)
+        )
+      );
+
+    // sum() returns string or null, convert to number
+    return result?.total ? Number(result.total) : 0;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get user monthly usage"
+    );
+  }
+}
+
+/**
+ * Increment user's analysis count for today (or create new entry if doesn't exist)
+ * @param userId - User ID to increment usage for
+ * @returns The updated or created usage log entry
+ */
+export async function incrementUsage({ userId }: { userId: string }) {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Check if entry exists for today
+    const [existingEntry] = await db
+      .select()
+      .from(usageLogs)
+      .where(and(eq(usageLogs.userId, userId), eq(usageLogs.date, today)));
+
+    if (existingEntry) {
+      // Update existing entry
+      return await db
+        .update(usageLogs)
+        .set({
+          analysisCount: existingEntry.analysisCount + 1,
+        })
+        .where(eq(usageLogs.id, existingEntry.id))
+        .returning();
+    }
+
+    // Create new entry for today
+    return await db
+      .insert(usageLogs)
+      .values({
+        userId,
+        date: today,
+        analysisCount: 1,
+      })
+      .returning();
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to increment usage");
+  }
+}
+
+// ========================================
+// Red Flag Detector - File Management
+// ========================================
+
+/**
+ * Get all files that have passed their auto-delete date and haven't been deleted yet
+ * @returns Array of expired files that need to be deleted
+ */
+export async function getExpiredFiles(): Promise<UploadedFile[]> {
+  try {
+    const now = new Date();
+
+    return await db
+      .select()
+      .from(uploadedFiles)
+      .where(
+        and(
+          lte(uploadedFiles.autoDeleteAt, now),
+          isNull(uploadedFiles.deletedAt)
+        )
+      );
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get expired files"
+    );
+  }
+}
+
+/**
+ * Mark a file as deleted by setting the deletedAt timestamp
+ * @param fileId - File ID to mark as deleted
+ * @returns The updated file entry
+ */
+export async function markFileAsDeleted({ fileId }: { fileId: string }) {
+  try {
+    return await db
+      .update(uploadedFiles)
+      .set({ deletedAt: new Date() })
+      .where(eq(uploadedFiles.id, fileId))
+      .returning();
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to mark file as deleted"
     );
   }
 }
