@@ -6,7 +6,12 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import { DUMMY_PASSWORD } from "@/lib/constants";
 import { db, getUser } from "@/lib/db/queries";
-import { account, session, user, verificationToken } from "@/lib/db/schema";
+import {
+  account as accountTable,
+  session as sessionTable,
+  user as userTable,
+  verificationToken as verificationTokenTable,
+} from "@/lib/db/schema";
 import { authConfig } from "./auth.config";
 
 declare module "next-auth" {
@@ -37,10 +42,10 @@ export const {
 } = NextAuth({
   ...authConfig,
   adapter: DrizzleAdapter(db, {
-    usersTable: user,
-    accountsTable: account,
-    sessionsTable: session,
-    verificationTokensTable: verificationToken,
+    usersTable: userTable,
+    accountsTable: accountTable,
+    sessionsTable: sessionTable,
+    verificationTokensTable: verificationTokenTable,
   }),
   session: {
     strategy: "jwt", // Required for credentials provider, works with OAuth too

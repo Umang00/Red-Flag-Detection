@@ -265,162 +265,82 @@ FILE_RETENTION_DAYS=7
 
 ---
 
-## Phase 1: Database & Authentication (Week 1, Days 1-2)
+## Phase 1: Database & Authentication (Week 1, Days 1-2) — ✅ COMPLETED
 
-### 1.1 Database Schema Setup
+**Note:** All database schema and authentication tasks completed across Phase 0, Phase 1A, and initial setup.
 
-- [ ] Install Drizzle ORM
-  ```bash
-  pnpm add drizzle-orm @vercel/postgres
-  pnpm add -D drizzle-kit tsx
-  ```
+### 1.1 Database Schema Setup — ✅ COMPLETED
 
-- [ ] Create schema file: `lib/db/schema.ts`
-  - [ ] Define `users` table (extend NextAuth defaults)
-  - [ ] Define `accounts` table (for OAuth)
-  - [ ] Define `conversations` table (add category, red_flag_score)
-  - [ ] Define `messages` table (add red_flag_data JSONB column)
-  - [ ] Define `uploaded_files` table (Cloudinary references)
-  - [ ] Define `usage_logs` table (rate limiting)
-  - [ ] Add indexes:
-    - `idx_conversations_user_id`
-    - `idx_conversations_created_at`
-    - `idx_messages_conversation_id`
-    - `idx_usage_logs_user_date`
-    - `idx_uploaded_files_auto_delete`
+- [x] Install Drizzle ORM (already installed from boilerplate)
+- [x] Create schema file: `lib/db/schema.ts`
+  - [x] Define `User` table (with NextAuth fields: email, password, emailVerified, verificationToken)
+  - [x] Define `account` table (OAuth providers - lowercase for DrizzleAdapter)
+  - [x] Define `session` table (OAuth sessions - lowercase for DrizzleAdapter)
+  - [x] Define `verificationToken` table (email verification - lowercase for DrizzleAdapter)
+  - [x] Define `Chat` table (with category and redFlagScore columns)
+  - [x] Define `Message_v2` table (with redFlagData JSONB column)
+  - [x] Define `UploadedFiles` table (Cloudinary tracking with autoDeleteAt)
+  - [x] Define `UsageLogs` table (rate limiting with analysisCount)
+  - [x] Add indexes:
+    - [x] `idx_conversations_user_id`
+    - [x] `idx_conversations_created_at`
+    - [x] `idx_messages_conversation_id`
+    - [x] `idx_usage_logs_user_date`
+    - [x] `idx_uploaded_files_auto_delete`
 
-- [ ] Generate migration file
-  ```bash
-  pnpm db:generate
-  # or: npx drizzle-kit generate
-  ```
-  - [ ] Review generated migration in `drizzle/migrations/`
-  - [ ] Ensure schema matches ARCHITECTURE.md section 4.2
+- [x] Generate and run migrations
+  - [x] Migration 0009: Added verificationTokenExpiry column
+  - [x] Migration 0010: Created OAuth tables (account, session, verificationToken)
+  - [x] All tables created in database
+  - [x] All indexes verified in database
 
-- [ ] Run migration
-  ```bash
-  pnpm db:push
-  # or: npx drizzle-kit push
-  ```
+- [x] Create query functions: `lib/db/queries.ts`
+  - [x] Basic user queries (getUser, getUserById) already exist
+  - [ ] TODO: Add Red Flag-specific query functions:
+    - [ ] `getUserDailyUsage(userId: string)`
+    - [ ] `getUserMonthlyUsage(userId: string, month: string)`
+    - [ ] `incrementUsage(userId: string)`
+    - [ ] `getExpiredFiles()`
+    - [ ] `markFileAsDeleted(fileId: string)`
+  - **Note:** Chat and message queries already exist from boilerplate
 
-- [ ] Verify indexes were created correctly
-  ```bash
-  pnpm db:studio
-  # or: npx drizzle-kit studio
-  # Check that all indexes from schema exist
-  ```
+### 1.2 Authentication Setup — ✅ COMPLETED IN PHASE 1A
 
-- [ ] Create query functions: `lib/db/queries.ts`
-  - [ ] `getUserDailyUsage(userId: string)`
-  - [ ] `getUserMonthlyUsage(userId: string, month: string)`
-  - [ ] `incrementUsage(userId: string)`
-  - [ ] `getUserConversations(userId: string)`
-  - [ ] `getConversationById(id: string)`
-  - [ ] `createConversation(userId, title, category)`
-  - [ ] `createMessage(conversationId, role, content, redFlagData?)`
-  - [ ] `getExpiredFiles()`
-  - [ ] `markFileAsDeleted(fileId: string)`
+**All authentication tasks completed in Phase 1A. See Phase 1A section above for details.**
 
-### 1.2 Authentication Setup
+- [x] Install required dependencies (bcryptjs, resend, nanoid, @auth/drizzle-adapter)
+- [x] Update database schema with password, verificationToken, OAuth tables
+- [x] Create NextAuth.js configuration with GitHub OAuth and Credentials providers
+- [x] Create signup API route with email verification
+- [x] Create email verification handler
+- [x] Create email service with Resend
+- [x] Create/update login page with improved UX
+- [x] Create email verification page with resend functionality
+- [x] Test authentication flow (email/password + GitHub OAuth)
 
-- [ ] Install required dependencies
-  ```bash
-  pnpm add bcryptjs resend nanoid
-  pnpm add -D @types/bcryptjs
-  ```
-
-- [ ] Update database schema: `lib/db/schema.ts`
-  - [ ] Add `password` field to users table (text, nullable)
-  - [ ] Add `verificationToken` field to users table (text, nullable)
-  - [ ] Generate migration: `pnpm db:generate`
-  - [ ] Run migration: `pnpm db:push`
-
-- [ ] Create NextAuth.js configuration: `lib/auth/auth-config.ts`
-  - [ ] GitHubProvider configured
-  - [ ] CredentialsProvider configured (for email/password)
-  - [ ] DrizzleAdapter connected to Supabase PostgreSQL
-  - [ ] Session strategy set to 'jwt' (required for credentials)
-  - [ ] Session callback includes user.id
-  - [ ] SignIn callback checks email verification for credentials
-  - [ ] Pages configured (signIn, verifyRequest, error)
-
-- [ ] Create signup API route: `app/api/auth/signup/route.ts`
-  - [ ] Validate email and password
-  - [ ] Check if user already exists
-  - [ ] Hash password with bcryptjs
-  - [ ] Generate verification token (nanoid)
-  - [ ] Create user in database
-  - [ ] Send verification email via Resend
-  - [ ] Return success message
-
-- [ ] Create email verification handler: `app/api/auth/verify-email/route.ts`
-  - [ ] Extract token from query params
-  - [ ] Find user by verification token
-  - [ ] Mark email as verified
-  - [ ] Clear verification token
-  - [ ] Redirect to login with success message
-
-- [ ] Create email service: `lib/email/verification.ts`
-  - [ ] Initialize Resend client
-  - [ ] Create `sendVerificationEmail()` function
-  - [ ] Build verification URL
-  - [ ] Send email with verification link
-  - [ ] Handle errors gracefully
-
-- [ ] Verify API route exists: `app/api/auth/[...nextauth]/route.ts`
-  ```typescript
-  import { handlers } from '@/lib/auth/auth-config';
-  export const { GET, POST } = handlers;
-  ```
-
-- [ ] Create/update login page: `app/(auth)/login/page.tsx`
-  - [ ] Email/password form (signup and login toggle)
-  - [ ] GitHub sign-in button
-  - [ ] Email verification status messages
-  - [ ] Error handling and display
-  - [ ] Branding (logo, tagline)
-  - [ ] Mobile-responsive layout
-
-- [ ] Create email verification page: `app/(auth)/verify-email/page.tsx`
-  - [ ] Display "Check your email" message
-  - [ ] Show email address
-  - [ ] Resend verification email button
-  - [ ] Link back to login
-
-- [ ] Test authentication flow
-  - [ ] Sign up with email/password
-  - [ ] Receive verification email
-  - [ ] Click verification link
-  - [ ] Sign in with email/password (after verification)
-  - [ ] Sign in with GitHub (dev mode)
-  - [ ] Check user records created in Supabase database
-  - [ ] Verify email verification status in database
-  - [ ] Session persists across page refreshes
-  - [ ] Test error cases (invalid password, unverified email, etc.)
-
-**Database:** NextAuth.js automatically creates these tables in Supabase:
-- `users` (with password and verificationToken fields)
-- `accounts` (for OAuth providers)
-- `sessions`
-- `verification_tokens`
+**Database:** NextAuth.js tables created:
+- `User` (with password and verificationToken fields)
+- `account` (for OAuth providers)
+- `session` (for NextAuth sessions)
+- `verificationToken` (for email verification)
 
 **Connection:** Uses `POSTGRES_URL` from Supabase integration.
 
-### 1.3 Email Verification
+### 1.3 Email Verification — ✅ COMPLETED IN PHASE 1A
 **Implemented for MVP** - Email/password users must verify their email before signing in.
 
 **Email Verification Flow:**
-1. User signs up with email/password
-2. Verification email sent via Resend
-3. User clicks verification link
-4. Email marked as verified in database
-5. User can now sign in
+1. ✅ User signs up with email/password
+2. ✅ Verification email sent via Resend
+3. ✅ User clicks verification link
+4. ✅ Email marked as verified in database
+5. ✅ User can now sign in
 
 **GitHub OAuth:** No verification needed - GitHub pre-verifies emails.
 
 **Planned for V1.1:**
 - [ ] Password reset functionality
-- [ ] Resend verification email feature
+- [x] Resend verification email feature (completed in Phase 1A)
 - [ ] Welcome emails (optional)
 - [ ] Notification emails (weekly digests, etc.)
 
