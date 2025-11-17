@@ -19,7 +19,9 @@
       "Bash(timeout:*)",
       "Bash(nul)",
       "Bash(exit 0)",
-      "Bash(.gitignore)"
+      "Bash(.gitignore)",
+      "Bash(ls:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

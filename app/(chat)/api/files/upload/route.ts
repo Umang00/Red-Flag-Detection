@@ -2,6 +2,8 @@ import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
+import { db } from "@/lib/db/queries";
+import { uploadedFiles } from "@/lib/db/schema";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -40,9 +42,14 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as Blob;
+    const chatId = formData.get("chatId") as string;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    }
+
+    if (!chatId) {
+      return NextResponse.json({ error: "Chat ID required" }, { status: 400 });
     }
 
     const validatedFile = FileSchema.safeParse({ file });
@@ -80,7 +87,20 @@ export async function POST(request: Request) {
         uploadStream.end(buffer);
       });
 
+      // Store metadata in database
+      const [fileRecord] = await db
+        .insert(uploadedFiles)
+        .values({
+          chatId,
+          cloudinaryUrl: uploadResult.secure_url,
+          cloudinaryPublicId: uploadResult.public_id,
+          fileType: file.type,
+          fileSize: file.size,
+        })
+        .returning();
+
       return NextResponse.json({
+        id: fileRecord.id,
         url: uploadResult.secure_url,
         pathname: filename,
         contentType: file.type,
