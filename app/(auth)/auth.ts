@@ -1,10 +1,12 @@
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { compare } from "bcryptjs";
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import { DUMMY_PASSWORD } from "@/lib/constants";
-import { getUser } from "@/lib/db/queries";
+import { db, getUser } from "@/lib/db/queries";
+import { account, session, user, verificationToken } from "@/lib/db/schema";
 import { authConfig } from "./auth.config";
 
 declare module "next-auth" {
@@ -34,6 +36,15 @@ export const {
   signOut,
 } = NextAuth({
   ...authConfig,
+  adapter: DrizzleAdapter(db, {
+    usersTable: user,
+    accountsTable: account,
+    sessionsTable: session,
+    verificationTokensTable: verificationToken,
+  }),
+  session: {
+    strategy: "jwt", // Required for credentials provider, works with OAuth too
+  },
   providers: [
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID || "",
@@ -64,27 +75,44 @@ export const {
           return null;
         }
 
+        console.log(
+          "[AUTH] Comparing password. Input length:",
+          password.length,
+          "Hash from DB:",
+          `${user.password.substring(0, 20)}...`
+        );
         const passwordsMatch = await compare(password, user.password);
+        console.log("[AUTH] Password match:", passwordsMatch);
 
         if (!passwordsMatch) {
+          console.log("[AUTH] Password mismatch - login failed");
           return null;
         }
 
+        console.log("[AUTH] Login successful for user:", user.id);
         return user;
       },
     }),
   ],
   callbacks: {
     jwt({ token, user }) {
+      // When a user signs in, set the token.id from the user object
       if (user) {
         token.id = user.id as string;
+      }
+      // Preserve existing token.id if it exists (for subsequent requests)
+      // Also use token.sub as fallback (default user ID in JWT)
+      if (!token.id && token.sub) {
+        token.id = token.sub;
       }
 
       return token;
     },
     session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
+        // With JWT strategy, use token.id or fall back to token.sub
+        // token.sub is the default user ID in NextAuth JWT tokens
+        session.user.id = (token.id as string) || (token.sub as string) || "";
       }
 
       return session;

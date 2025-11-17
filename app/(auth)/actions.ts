@@ -6,7 +6,7 @@ import { signIn } from "./auth";
 
 const authFormSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(8),
 });
 
 export type LoginActionState = {

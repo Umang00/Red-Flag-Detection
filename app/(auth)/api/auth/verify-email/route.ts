@@ -70,6 +70,37 @@ export async function GET(request: Request) {
 
     const [foundUser] = users;
 
+    // Check if token expired
+    if (
+      foundUser.verificationTokenExpiry &&
+      new Date() > foundUser.verificationTokenExpiry
+    ) {
+      return new Response(
+        `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Verification Link Expired</title>
+            <style>
+              body { font-family: system-ui; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }
+              .error { color: #dc2626; }
+            </style>
+          </head>
+          <body>
+            <h1 class="error">⏰ Verification Link Expired</h1>
+            <p>This verification link has expired. Verification links are valid for 24 hours.</p>
+            <a href="/login?error=token_expired&email=${encodeURIComponent(foundUser.email)}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 6px;">Request New Verification Email</a>
+          </body>
+        </html>
+        `,
+        {
+          status: 410,
+          headers: { "Content-Type": "text/html" },
+        }
+      );
+    }
+
     // Check if already verified
     if (foundUser.emailVerified) {
       return new Response(

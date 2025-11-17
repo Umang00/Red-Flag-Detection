@@ -13,11 +13,12 @@ export async function middleware(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
-  // Allow access to auth routes (login, register, etc.)
+  // Allow access to auth routes (login, register, verify-email, etc.)
   if (
     pathname.startsWith("/api/auth") ||
     pathname === "/login" ||
-    pathname === "/register"
+    pathname === "/register" ||
+    pathname === "/verify-email"
   ) {
     return NextResponse.next();
   }

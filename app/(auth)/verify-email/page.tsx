@@ -2,11 +2,55 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import { toast } from "@/components/toast";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "your email";
+  const [isResending, setIsResending] = useState(false);
+
+  const handleResend = async () => {
+    if (email === "your email") {
+      toast({
+        type: "error",
+        description: "Email address not found. Please sign up again.",
+      });
+      return;
+    }
+
+    setIsResending(true);
+
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          type: "success",
+          description:
+            data.message || "Verification email sent! Please check your inbox.",
+        });
+      } else {
+        toast({
+          type: "error",
+          description: data.error || "Failed to resend verification email.",
+        });
+      }
+    } catch (_error) {
+      toast({
+        type: "error",
+        description: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   return (
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">
@@ -53,17 +97,27 @@ function VerifyEmailContent() {
             </ol>
           </div>
 
-          <div className="mt-4 space-y-2">
-            <p className="text-gray-500 text-xs dark:text-zinc-500">
-              Didn't receive the email? Check your spam folder or{" "}
-              <button
-                className="font-semibold text-primary hover:underline"
-                type="button"
-              >
-                resend verification email
-              </button>
-              .
-            </p>
+          <div className="mt-4 space-y-3">
+            <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-left dark:border-yellow-700 dark:bg-yellow-950/30">
+              <p className="text-sm text-yellow-900 dark:text-yellow-200">
+                <strong>Can't find the email?</strong>
+              </p>
+              <ol className="mt-2 ml-4 list-decimal space-y-1 text-sm text-yellow-800 dark:text-yellow-300">
+                <li>Check your spam or junk folder</li>
+                <li>Check promotions tab (if using Gmail)</li>
+                <li>Wait a few minutes - it can take up to 5 minutes</li>
+                <li>Make sure you entered the correct email address</li>
+              </ol>
+            </div>
+
+            <button
+              className="w-full rounded-lg border border-primary bg-primary/10 px-4 py-2 font-semibold text-primary text-sm hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isResending}
+              onClick={handleResend}
+              type="button"
+            >
+              {isResending ? "Sending..." : "📧 Resend Verification Email"}
+            </button>
           </div>
         </div>
 

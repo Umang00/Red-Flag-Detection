@@ -8,9 +8,15 @@ export async function sendVerificationEmail(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
+    console.log("[EMAIL] Attempting to send verification email to:", email);
+    console.log("[EMAIL] Verification URL:", verificationUrl);
+    console.log(
+      "[EMAIL] Resend API key present:",
+      !!process.env.RESEND_API_KEY
+    );
 
-    await resend.emails.send({
-      from: "Red Flag Detector <onboarding@resend.dev>", // Update to your verified domain in production
+    const result = await resend.emails.send({
+      from: "Red Flag Detector <umang@lightningaisolutions.in>",
       to: email,
       subject: "Verify your email address",
       html: `
@@ -64,9 +70,10 @@ export async function sendVerificationEmail(
       `,
     });
 
+    console.log("[EMAIL] Email sent successfully. Result:", result);
     return { success: true };
   } catch (error) {
-    console.error("Failed to send verification email:", error);
+    console.error("[EMAIL] Failed to send verification email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to send email",

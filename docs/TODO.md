@@ -196,6 +196,75 @@ FILE_RETENTION_DAYS=7
 
 ---
 
+## Phase 1A: Authentication UX & GitHub OAuth — ✅ COMPLETED
+
+**Goal:** Fix authentication user experience and add GitHub OAuth persistence
+
+### Email Verification Flow ✅
+- [x] Add `/verify-email` to middleware whitelist
+- [x] Create dedicated verify-email page with professional UI
+- [x] Add functional resend verification button
+- [x] Add spam folder tips (numbered list for consistency)
+- [x] Add signup success toast notification
+- [x] Redirect to verify-email page after signup
+
+### Login Navigation Fixes ✅
+- [x] Fix infinite session refresh loop (removed `updateSession()` call)
+- [x] Disable automatic session polling (set `refetchInterval={0}`)
+- [x] Fix redirect to homepage after login (`router.push("/")`)
+- [x] Fix Fast Refresh continuous rebuilding issue
+- [x] Smooth navigation to homepage after successful login
+
+### Authentication UX Improvements ✅
+- [x] Update toast messages (security-conscious, user-friendly)
+- [x] Fix resend button logic (only show when email not verified)
+- [x] Don't show resend button for wrong password errors
+- [x] Consistent styling on verify-email page
+
+### GitHub OAuth with DrizzleAdapter ✅
+- [x] Install `@auth/drizzle-adapter`
+- [x] Create OAuth database tables:
+  - [x] `account` table (lowercase, with provider info and tokens)
+  - [x] `session` table (lowercase, for database sessions)
+  - [x] `verificationToken` table (lowercase, for email verification)
+- [x] Configure DrizzleAdapter with custom table schema objects
+- [x] Add GitHub provider to NextAuth config
+- [x] Set session strategy to "jwt" explicitly
+- [x] Update JWT callback to handle token.id and token.sub fallback
+- [x] Update session callback to handle undefined token.id
+- [x] Add foreign key constraints with cascade deletes
+
+### Database Schema Synchronization ✅
+- [x] Fix table naming conflicts (PascalCase vs lowercase)
+- [x] Drop duplicate OAuth tables (removed PascalCase versions)
+- [x] Keep lowercase tables as required by DrizzleAdapter
+- [x] User table remains "User" (PascalCase) with adapter config
+- [x] Fix migration 0009 to check if column exists before adding
+- [x] Create migration 0010 for OAuth tables
+- [x] Verify database state with inspection scripts
+
+### Verification ✅
+- [x] Email/password signup → verify-email page → verification email → login works
+- [x] Email verification required before credentials login
+- [x] Resend verification email functionality works
+- [x] Login navigates smoothly to homepage (no infinite loops)
+- [x] GitHub OAuth ready for testing (adapter configured)
+- [x] No console errors, no Fast Refresh loops
+- [x] Build compiles successfully
+
+**Files Modified:**
+- `middleware.ts` - Added /verify-email to whitelist
+- `app/layout.tsx` - Disabled session polling
+- `app/(auth)/login/page.tsx` - Fixed navigation and error handling
+- `app/(auth)/register/page.tsx` - Added success toast
+- `app/(auth)/verify-email/page.tsx` - Complete overhaul with resend functionality
+- `lib/db/schema.ts` - Added OAuth tables
+- `app/(auth)/auth.ts` - Configured DrizzleAdapter and JWT strategy
+- `lib/db/migrations/0009_zippy_midnight.sql` - Fixed duplicate column check
+- `lib/db/migrations/0010_flashy_kid_colt.sql` - Created OAuth tables
+
+---
+
 ## Phase 1: Database & Authentication (Week 1, Days 1-2)
 
 ### 1.1 Database Schema Setup

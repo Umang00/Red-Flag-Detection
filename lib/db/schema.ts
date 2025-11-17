@@ -25,11 +25,62 @@ export const user = pgTable("User", {
   name: text("name"),
   image: text("image"),
   verificationToken: text("verificationToken"),
+  verificationTokenExpiry: timestamp("verificationTokenExpiry"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
 
 export type User = InferSelectModel<typeof user>;
+
+// OAuth tables for NextAuth.js DrizzleAdapter
+// Note: Using lowercase table names as required by DrizzleAdapter
+export const account = pgTable(
+  "account",
+  {
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.provider, table.providerAccountId] }),
+  })
+);
+
+export type Account = InferSelectModel<typeof account>;
+
+export const session = pgTable("session", {
+  sessionToken: text("sessionToken").primaryKey().notNull(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  expires: timestamp("expires").notNull(),
+});
+
+export type Session = InferSelectModel<typeof session>;
+
+export const verificationToken = pgTable(
+  "verificationToken",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires").notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.identifier, table.token] }),
+  })
+);
+
+export type VerificationToken = InferSelectModel<typeof verificationToken>;
 
 export const chat = pgTable(
   "Chat",

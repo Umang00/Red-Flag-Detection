@@ -39,17 +39,57 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (existingUsers.length > 0) {
-      return NextResponse.json(
-        { error: "An account with this email already exists" },
-        { status: 400 }
+      const [existingUser] = existingUsers;
+
+      // If user exists and is already verified, tell them to sign in
+      if (existingUser.emailVerified) {
+        return NextResponse.json(
+          { error: "Account already exists. Please sign in." },
+          { status: 400 }
+        );
+      }
+
+      // User exists but NOT verified - resend verification email
+      console.log(
+        "[SIGNUP] User exists but not verified. Resending verification email."
       );
+
+      const newToken = nanoid(32);
+      const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      // Update token and expiry
+      await db
+        .update(user)
+        .set({
+          verificationToken: newToken,
+          verificationTokenExpiry: tokenExpiry,
+        })
+        .where(eq(user.id, existingUser.id));
+
+      // Resend verification email
+      await sendVerificationEmail(email, newToken);
+
+      return NextResponse.json({
+        success: true,
+        message:
+          "Account exists but not verified. Verification email resent! Please check your inbox.",
+        userId: existingUser.id,
+        action: "resent",
+      });
     }
 
     // Hash password (10 rounds as per boilerplate)
     const hashedPassword = await hash(password, 10);
+    console.log(
+      "[SIGNUP] Password length:",
+      password.length,
+      "Hash length:",
+      hashedPassword.length
+    );
 
     // Generate verification token
     const verificationToken = nanoid(32);
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
 
     // Create user
     const [newUser] = await db
@@ -59,9 +99,17 @@ export async function POST(request: Request) {
         password: hashedPassword,
         name: name || null,
         verificationToken,
+        verificationTokenExpiry: tokenExpiry,
         emailVerified: null, // Not verified yet
       })
       .returning();
+
+    console.log(
+      "[SIGNUP] User created with ID:",
+      newUser.id,
+      "Password hash stored:",
+      `${hashedPassword.substring(0, 20)}...`
+    );
 
     // Send verification email
     const emailResult = await sendVerificationEmail(email, verificationToken);

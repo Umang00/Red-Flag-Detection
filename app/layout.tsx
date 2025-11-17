@@ -79,7 +79,9 @@ export default function RootLayout({
           enableSystem
         >
           <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
+            {children}
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

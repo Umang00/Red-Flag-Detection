@@ -33,8 +33,14 @@ export default function Page() {
       });
     } else if (state.status === "success") {
       setIsSuccessful(true);
-      // Redirect to verification waiting page
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      toast({
+        type: "success",
+        description: "Account created! Please check your email to verify.",
+      });
+      // Redirect to verification waiting page after a brief delay
+      setTimeout(() => {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      }, 500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.status, router, email]);

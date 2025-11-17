@@ -64,6 +64,20 @@
       "when": 1763315602089,
       "tag": "0008_lively_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1763380154975,
+      "tag": "0009_zippy_midnight",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1763404777339,
+      "tag": "0010_flashy_kid_colt",
+      "breakpoints": true
     }
   ]
 }
