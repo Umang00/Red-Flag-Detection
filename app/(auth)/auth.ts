@@ -2,6 +2,7 @@ import { compare } from "bcryptjs";
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
 import { DUMMY_PASSWORD } from "@/lib/constants";
 import { getUser } from "@/lib/db/queries";
 import { authConfig } from "./auth.config";
@@ -34,6 +35,10 @@ export const {
 } = NextAuth({
   ...authConfig,
   providers: [
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    }),
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -51,6 +56,11 @@ export const {
 
         if (!user.password) {
           await compare(password, DUMMY_PASSWORD);
+          return null;
+        }
+
+        // Check if email is verified for credentials login
+        if (!user.emailVerified) {
           return null;
         }
 
