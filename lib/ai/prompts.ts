@@ -1,4 +1,5 @@
 import type { Geo } from "@vercel/functions";
+import { getRedFlagPrompt, type RedFlagCategory } from "./red-flag-prompts";
 
 export const regularPrompt =
   "You are a friendly assistant! Keep your responses concise and helpful.";
@@ -20,12 +21,23 @@ About the origin of user's request:
 
 export const systemPrompt = ({
   requestHints,
+  category,
 }: {
   selectedChatModel: string;
   requestHints: RequestHints;
+  category?: RedFlagCategory;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
-  return `${regularPrompt}\n\n${requestPrompt}`;
+
+  // If category is provided, use Red Flag analysis prompt
+  if (category && category !== "general") {
+    const redFlagPrompt = getRedFlagPrompt(category);
+    return `${redFlagPrompt}\n\n${requestPrompt}`;
+  }
+
+  // Default to general Red Flag analysis
+  const redFlagPrompt = getRedFlagPrompt("general");
+  return `${redFlagPrompt}\n\n${requestPrompt}`;
 };
 
 export const titlePrompt = `\n

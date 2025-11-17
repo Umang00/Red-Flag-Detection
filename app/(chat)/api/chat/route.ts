@@ -71,11 +71,19 @@ export async function POST(request: Request) {
       message,
       selectedChatModel,
       selectedVisibilityType,
+      category,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
+      category?:
+        | "dating"
+        | "conversations"
+        | "jobs"
+        | "housing"
+        | "marketplace"
+        | "general";
     } = requestBody;
 
     const session = await auth();
@@ -112,6 +120,7 @@ export async function POST(request: Request) {
         userId: session.user.id,
         title,
         visibility: selectedVisibilityType,
+        category,
       });
       // New chat - no need to fetch messages, it's empty
     }
@@ -151,7 +160,7 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          system: systemPrompt({ selectedChatModel, requestHints, category }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools:
