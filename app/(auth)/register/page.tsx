@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useActionState, useEffect, useState } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
@@ -22,8 +21,6 @@ export default function Page() {
     }
   );
 
-  const { update: updateSession } = useSession();
-
   useEffect(() => {
     if (state.status === "user_exists") {
       toast({ type: "error", description: "Account already exists!" });
@@ -35,14 +32,12 @@ export default function Page() {
         description: "Failed validating your submission!",
       });
     } else if (state.status === "success") {
-      toast({ type: "success", description: "Account created successfully!" });
-
       setIsSuccessful(true);
-      updateSession();
-      router.refresh();
+      // Redirect to verification waiting page
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.status, router.refresh, updateSession]);
+  }, [state.status, router, email]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);

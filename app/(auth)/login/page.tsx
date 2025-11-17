@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useState } from "react";
+import { Suspense, useActionState, useEffect, useState } from "react";
 
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { type LoginActionState, login } from "../actions";
 
-export default function Page() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -25,11 +26,21 @@ export default function Page() {
 
   const { update: updateSession } = useSession();
 
+  // Show success message if coming from email verification
+  useEffect(() => {
+    if (searchParams.get("verified") === "true") {
+      toast({
+        type: "success",
+        description: "Email verified! You can now sign in.",
+      });
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (state.status === "failed") {
       toast({
         type: "error",
-        description: "Invalid credentials!",
+        description: "Invalid credentials or email not verified!",
       });
     } else if (state.status === "invalid_data") {
       toast({
@@ -73,5 +84,19 @@ export default function Page() {
         </AuthForm>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-dvh w-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

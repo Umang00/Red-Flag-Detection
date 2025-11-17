@@ -2,8 +2,6 @@
 
 import { z } from "zod";
 
-import { createUser, getUser } from "@/lib/db/queries";
-
 import { signIn } from "./auth";
 
 const authFormSchema = z.object({
@@ -61,18 +59,29 @@ export const register = async (
       password: formData.get("password"),
     });
 
-    const [user] = await getUser(validatedData.email);
+    // Call our signup API
+    const response = await fetch(
+      `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/auth/signup`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: validatedData.email,
+          password: validatedData.password,
+        }),
+      }
+    );
 
-    if (user) {
-      return { status: "user_exists" } as RegisterActionState;
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (data.error?.includes("already exists")) {
+        return { status: "user_exists" };
+      }
+      return { status: "failed" };
     }
-    await createUser(validatedData.email, validatedData.password);
-    await signIn("credentials", {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
-    });
 
+    // Success - user created and verification email sent
     return { status: "success" };
   } catch (error) {
     if (error instanceof z.ZodError) {
