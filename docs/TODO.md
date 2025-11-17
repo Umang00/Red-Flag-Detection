@@ -296,12 +296,12 @@ FILE_RETENTION_DAYS=7
 
 - [x] Create query functions: `lib/db/queries.ts`
   - [x] Basic user queries (getUser, getUserById) already exist
-  - [ ] TODO: Add Red Flag-specific query functions:
-    - [ ] `getUserDailyUsage(userId: string)`
-    - [ ] `getUserMonthlyUsage(userId: string, month: string)`
-    - [ ] `incrementUsage(userId: string)`
-    - [ ] `getExpiredFiles()`
-    - [ ] `markFileAsDeleted(fileId: string)`
+  - [x] ✅ Red Flag-specific query functions implemented:
+    - [x] `getUserDailyUsage(userId: string)` - Get total analysis count for today
+    - [x] `getUserMonthlyUsage(userId: string, month: string)` - Get total count for specific month
+    - [x] `incrementUsage(userId: string)` - Increment or create today's usage entry
+    - [x] `getExpiredFiles()` - Get files past autoDeleteAt that need cleanup
+    - [x] `markFileAsDeleted(fileId: string)` - Mark file as deleted with timestamp
   - **Note:** Chat and message queries already exist from boilerplate
 
 ### 1.2 Authentication Setup — ✅ COMPLETED IN PHASE 1A
