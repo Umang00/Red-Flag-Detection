@@ -1,5 +1,5 @@
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
-import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Stub API route for voting functionality
@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
  * TODO: Remove this in Phase 4 when we replace the chat UI
  */
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json([]);
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(_request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
