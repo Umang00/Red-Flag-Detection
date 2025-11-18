@@ -21,7 +21,8 @@
       "Bash(exit 0)",
       "Bash(.gitignore)",
       "Bash(ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx ultracite@latest check:*)"
     ],
     "deny": [],
     "ask": []

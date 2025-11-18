@@ -30,12 +30,12 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        "chat-model": google("gemini-2.0-flash-exp"),
+        "chat-model": google("gemini-2.5-flash"),
         "chat-model-reasoning": wrapLanguageModel({
-          model: google("gemini-2.0-flash-thinking-exp-1219"),
+          model: google("gemini-2.5-flash"),
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
-        "title-model": google("gemini-2.0-flash-exp"),
-        "artifact-model": google("gemini-2.0-flash-exp"),
+        "title-model": google("gemini-2.5-flash"),
+        "artifact-model": google("gemini-2.5-flash"),
       },
     });
