@@ -74,19 +74,24 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/typography": "^0.5.15",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.8.6",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-syntax-highlighter": "^15.5.13",
     "drizzle-kit": "^0.25.0",
+    "jsdom": "^27.2.0",
     "postcss": "^8",
     "tailwindcss": "^4.1.13",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3",
-    "ultracite": "5.3.9"
+    "ultracite": "5.3.9",
+    "vitest": "^4.0.10"
   },
   "packageManager": "pnpm@9.12.3"
 }
