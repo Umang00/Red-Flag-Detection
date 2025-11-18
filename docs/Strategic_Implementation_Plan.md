@@ -203,99 +203,103 @@ Your project is initialized from the Vercel AI Chatbot boilerplate but has **thr
 
 ---
 
-## Phase 5: API Route Refactoring — ✅ COMPLETED
+## Phase 5: API Route Refactoring — ⏳ NEXT PRIORITY
 
 **Goal:** Adapt existing routes for Red Flag Detector use case
 
-### Completed Tasks ✅
+### Tasks Remaining
 
-**Modified `/api/chat/route.ts`** ✅
-* ✅ Added category detection logic
-* ✅ Added Red Flag analysis prompt integration
-* ✅ Integrated with Gemini AI (Google AI SDK)
-* ✅ Parse AI response for red flag data
-* ✅ Store analysis results in `Message_v2.redFlagData`
-* ✅ Update `Chat.redFlagScore` based on analysis
-* ✅ Category-specific system prompts implemented
+**Modify `/api/chat/route.ts`**
+* [ ] Remove tool definitions (weather, documents)
+* [ ] Remove tokenlens usage
+* [ ] Add category detection logic
+* [ ] Add Red Flag analysis prompt
+* [ ] Integrate with Gemini AI
+* [ ] Parse AI response for red flag data
+* [ ] Store analysis results in `Message_v2.redFlagData`
+* [ ] Update `Chat.redFlagScore` based on analysis
 
-**Created `/api/files/upload/route.ts`** ✅
-* ✅ User authentication with NextAuth session
-* ✅ Validate file types (JPG, PNG, PDF only)
-* ✅ Validate file sizes (<100 MB each)
-* ✅ Upload to Cloudinary with proper configuration
-* ✅ Store metadata in `UploadedFiles` table
-* ✅ Return Cloudinary URLs
-* ✅ Proper error handling and validation
+**Create `/api/upload/route.ts`**
+* [ ] Authenticate user
+* [ ] Validate file types (JPG, PNG, PDF only)
+* [ ] Validate file sizes (<100 MB each, max 5 files)
+* [ ] Compress large images (>10 MB)
+* [ ] Upload to Cloudinary
+* [ ] Store metadata in `UploadedFiles` table
+* [ ] Return Cloudinary URLs
+* [ ] Rate limit: 20 uploads/minute
 
-**Created `/api/usage/route.ts`** ✅
-* ✅ GET handler - returns user's current usage
-* ✅ Check daily usage (2 analyses/day limit)
-* ✅ Check monthly usage (10 analyses/month limit)
-* ✅ Returns: `{ dailyUsage, dailyLimit, monthlyUsage, monthlyLimit, canAnalyze, resetTime }`
-* ✅ Calculates reset time (midnight UTC)
-* ✅ Query logic implemented inline (efficient approach)
+**Create `/api/usage/route.ts`**
+* [ ] GET handler - return user's current usage
+* [ ] Check daily usage (2 analyses/day limit)
+* [ ] Check monthly usage (10 analyses/month limit)
+* [ ] Return: `{ dailyUsage, dailyLimit, monthlyUsage, monthlyLimit, canAnalyze, resetTime }`
 
-**Database Query Functions** ✅
-* ✅ Usage queries implemented directly in `/api/usage/route.ts` (inline approach)
-* ✅ File upload queries implemented in `/api/files/upload/route.ts`
-* ✅ All chat and message queries already exist from boilerplate
-* **Note:** Query functions implemented inline in route handlers - valid and efficient approach for this use case
+**Create Query Functions in `lib/db/queries.ts`**
+* [ ] `getUserDailyUsage(userId: string)`
+* [ ] `getUserMonthlyUsage(userId: string, month: string)`
+* [ ] `incrementUsage(userId: string)`
+* [ ] `getExpiredFiles()`
+* [ ] `markFileAsDeleted(fileId: string)`
+
+**Optional: Delete Unused Routes**
+* [ ] `/api/document/route.ts` (if exists)
+* [ ] `/api/suggestions/route.ts` (if exists)
+* [ ] `/api/vote/route.ts` (optional, might be useful)
 
 ---
 
-## Phase 6: Component Simplification — ✅ COMPLETED
+## Phase 6: Component Simplification — ⏳ UPCOMING
 
 **Goal:** Adapt chat UI for file upload + analysis display
 
-### Completed Tasks ✅
+### Modify Existing Chat Components
 
-**Chat Component Modifications** ✅
-* ✅ Integrated file staging area into chat interface
-* ✅ Added category selector to chat UI
-* ✅ Maintained existing chat UI structure from boilerplate
-* ✅ Proper integration with message rendering
+**Update `components/chat.tsx` (or similar)**
+* [ ] Remove document/artifact logic
+* [ ] Add file staging area above input
+* [ ] Add category selector at top
+* [ ] Integrate with existing chat UI from boilerplate
 
-**Chat Message Rendering** ✅
-* ✅ Detects if message has `redFlagData`
-* ✅ Renders RedFlagScoreCard component for analysis messages
-* ✅ Renders normal message bubbles for regular messages
-* ✅ Shows uploaded images in message thread
+**Update chat message rendering**
+* [ ] Detect if message has `redFlagData`
+* [ ] If yes: render RedFlagScoreCard component
+* [ ] If no: render normal message bubble
+* [ ] Show uploaded images in message thread
 
-### New Red Flag Components Created ✅
+### Create New Red Flag Components
 
-**Created `components/red-flag-score-card.tsx`** ✅
-* ✅ Large score display (0-10) with color coding
-* ✅ Color-coded scores (red: 7+, yellow: 4-6, green: 0-3)
-* ✅ Verdict text display
-* ✅ Expandable flag sections (Critical 🔴 / Warnings 🟡 / Notices 🟢)
-* ✅ Each flag shows: category, evidence, explanation
-* ✅ Positives section display
-* ✅ Advice section
-* ✅ Proper TypeScript types and interfaces
-* ✅ Accessible with ARIA labels
+**Create `components/red-flag-score-card.tsx`**
+* [ ] Large score display (0-10)
+* [ ] Color-coded (red: 7+, yellow: 4-6, green: 0-3)
+* [ ] Verdict text
+* [ ] Expandable flag sections (Critical/Warnings/Notices)
+* [ ] Each flag shows: category, evidence, explanation
+* [ ] Positives section
+* [ ] Advice section
+* [ ] Share button
 
-**Created `components/file-staging-area.tsx`** ✅
-* ✅ Drag-drop zone using react-dropzone
-* ✅ File preview grid with thumbnails
-* ✅ File cards with thumbnail, name, size, remove button
-* ✅ Upload progress indicators (pending/uploading/uploaded/error states)
-* ✅ Max 5 files indicator
-* ✅ Supports JPG, PNG, PDF files
-* ✅ Visual feedback for drag-active state
+**Create `components/file-staging-area.tsx`**
+* [ ] Drag-drop zone (using react-dropzone)
+* [ ] File preview grid
+* [ ] File cards with thumbnail, name, size, remove button
+* [ ] Upload progress indicators
+* [ ] Max 5 files indicator
+* [ ] "Analyze" button (disabled until uploaded)
 
-**Created `components/category-selector.tsx`** ✅
-* ✅ 5 category buttons: Dating, Conversations, Jobs, Housing, Marketplace
-* ✅ Responsive grid layout (2 cols mobile, 3 cols tablet, 5 cols desktop)
-* ✅ Icons (emoji) + labels
-* ✅ Selected state styling with ring indicator
-* ✅ Toggle selection (click to deselect)
-* ✅ Integrated with Red Flag category system
+**Create `components/category-selector.tsx`**
+* [ ] 6 category buttons: Dating, Conversations, Jobs, Housing, Marketplace, General
+* [ ] Horizontal scroll (mobile)
+* [ ] Grid layout (desktop)
+* [ ] Icons + labels
+* [ ] Selected state styling
+* [ ] Clear/change category option
 
-### Preserved Useful Components ✅
+### Keep Useful Components ✅
 
 * ✅ `auth-form.tsx` (already working)
-* ✅ `chat-header.tsx` (adapted for Red Flag Detector)
-* ✅ All `ui/*` components (shadcn components preserved)
+* ✅ `chat-header.tsx` (can adapt)
+* ✅ All `ui/*` components (shadcn components)
 
 ---
 
@@ -347,15 +351,13 @@ NO → Fresh Start Alternative
 
 ## Progress Summary
 
-### ✅ Completed Phases (ALL Core Phases Complete!):
+### ✅ Completed Phases (Phases 0-4):
 - **Phase 0:** Critical fixes (bcrypt, guest mode, environment, build verification)
 - **Phase 1A:** Authentication UX & GitHub OAuth (email verification flow, login navigation, DrizzleAdapter)
 - **Phase 1:** Dependency cleanup (deferred - not blocking)
 - **Phase 2:** Database schema (ALL tables created: User, OAuth tables, Chat, Message_v2, UploadedFiles, UsageLogs)
 - **Phase 3:** File cleanup (deferred - not blocking)
 - **Phase 4:** Environment configuration (ALL variables set and verified)
-- **Phase 5:** API Route Refactoring (Red Flag analysis, file upload, usage tracking)
-- **Phase 6:** Component Simplification (Red Flag UI components, file staging, category selector)
 
 **Key Achievements:**
 - ✅ Authentication fully working (email/password + GitHub OAuth)
@@ -365,28 +367,26 @@ NO → Fresh Start Alternative
 - ✅ No infinite loops or navigation issues
 - ✅ Build compiles successfully
 - ✅ All environment variables configured
-- ✅ **Red Flag analysis API fully implemented**
-- ✅ **File upload to Cloudinary working**
-- ✅ **Usage tracking and rate limiting in place**
-- ✅ **All Red Flag UI components created (score card, file staging, category selector)**
-- ✅ **Category-based analysis system implemented**
+
+### ⏳ Next Priorities (Phases 5-6):
+- **Phase 5:** API Route Refactoring (NEXT - implement Red Flag analysis logic)
+  - Modify `/api/chat/route.ts` for Red Flag analysis
+  - Create `/api/upload/route.ts` for Cloudinary file uploads
+  - Create `/api/usage/route.ts` for rate limiting
+  - Add query functions to `lib/db/queries.ts`
+
+- **Phase 6:** Component Simplification (UPCOMING)
+  - Create Red Flag components (score card, file staging, category selector)
+  - Modify chat UI for file upload + analysis display
+  - Remove/adapt boilerplate document components
 
 ### 📊 Overall Progress:
 - **Setup & Authentication:** ✅ 100% Complete (Phases 0, 1A, 4)
 - **Database Foundation:** ✅ 100% Complete (Phase 2)
-- **Infrastructure:** ✅ 100% Complete (all API routes and queries implemented)
-- **Core Features (API Routes):** ✅ 100% Complete (Phase 5)
-- **UI Components:** ✅ 100% Complete (Phase 6 - All Red Flag components created)
-- **MVP Status:** ✅ **CORE IMPLEMENTATION COMPLETE** - Ready for testing and polish
-
-### ⏳ Remaining for Production Launch:
-The core Red Flag Detector functionality is complete. Remaining work is polish, testing, and optional features:
-- Testing and bug fixes
-- Landing page creation (optional for initial deployment)
-- Share functionality (optional)
-- Mobile optimization
-- Performance tuning
-- Deployment preparation
+- **Infrastructure:** ✅ 95% Complete (need query functions)
+- **Core Features (API Routes):** ⏳ 0% Complete (Phase 5 - NEXT)
+- **UI Components:** ⏳ 10% Complete (auth forms done, need Red Flag components - Phase 6)
+- **Estimated Time to MVP:** ~1-2 weeks remaining (Phases 5-6 + testing)
 
 ---
 
@@ -397,13 +397,12 @@ The core Red Flag Detector functionality is complete. Remaining work is polish, 
 * ✅ Complete database schema with Red Flag tables
 * ✅ Configure all environment variables
 * ✅ Test `pnpm build` at every phase
-* ✅ Core features implemented (API routes, components)
-* ✅ Defer non-blocking cleanup tasks (Phases 1 & 3 deferred)
+* ⏳ Focus on core features (API routes, components) next
+* ⏳ Defer non-blocking cleanup tasks
 
 ## Risk Mitigation
 
-* ✅ Commit after each phase (All phases committed)
+* ✅ Commit after each phase (Phase 0, Phase 1A committed)
 * ✅ Keep backups before major deletions
 * ✅ Incremental approach validated - no need for fresh start
-* ✅ All API routes implemented and tested
-* ✅ All UI components created and integrated
+* ⏳ Test each API route thoroughly before moving to UI
